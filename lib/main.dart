@@ -23,11 +23,14 @@ class FoodCalculatorPage extends StatefulWidget {
 
 class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
   int totalNumberOfGuests = 0;
+  int myIndex = 0;
 
   final Map<String, Map<String, dynamic>> foodItems = {
-    "Rice": {"price": 50, "factor": 10},
-    "Gravy": {"price": 70, "factor": 8},
-    "Sweet Dish": {"price": 100, "factor": 8},
+    "Rice": {"price": 1800, "factor": 10},
+    "Gravy": {"price": 1400, "factor": 8},
+    "Sweet Dish": {"price": 1200, "factor": 8},
+    "Naan Taftan": {"price": 400, "factor": 8},
+    
   };
 
   @override
@@ -35,6 +38,20 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Food Quantity Calculator'),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+
+        onTap: (index){
+          setState(() {
+            myIndex = index;
+          });
+
+        },
+        currentIndex: myIndex,
+
+        items: const[BottomNavigationBarItem(icon: Icon(Icons.food_bank_rounded), label: 'menu1'),
+        BottomNavigationBarItem(icon: Icon(Icons.food_bank), label: 'menu2'),
+        BottomNavigationBarItem(icon: Icon(Icons.food_bank_sharp), label: 'menu3',),],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
