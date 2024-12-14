@@ -9,7 +9,7 @@ class FoodCalculatorApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Food Quantity Calculator',
+      title: 'Lavish Food Quantity Calculator',
       theme: ThemeData(primarySwatch: Colors.blue),
       home: FoodCalculatorPage(),
     );
@@ -25,39 +25,76 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
   int totalNumberOfGuests = 0;
   int myIndex = 0;
 
-  final Map<String, Map<String, dynamic>> foodItems = {
-    "Rice": {"price": 1800, "factor": 10},
-    "Gravy": {"price": 1400, "factor": 8},
-    "Sweet Dish": {"price": 1200, "factor": 8},
-    "Naan Taftan": {"price": 400, "factor": 8},
-    
-  };
+  final List<Map<String, Map<String, dynamic>>> menus = [
+    {
+      "Beef Biryani / Pulao": {"price": 2500, "factor": 12}, // change this to float 12.5
+      "Chicken Karahi / Qorma": {"price": 1400, "factor": 8},
+      "Rabri Kheer  / Lab e sheren": {"price": 1200, "factor": 8},
+      "Naan Taftan": {"price": 400, "factor": 8},
+       "Salad Raita": {"price": 300, "factor": 10},
+    },
+    {
+
+      "Chicken Tikka (Bihari/Malai/Balochi)": {"price": 1300, "factor": 4}, // change this to float 12.5
+      "Beef Biryani / Pulao": {"price": 2500, "factor": 12}, // change this to float 12.5
+      "Chicken Karahi / Qorma": {"price": 1400, "factor": 8},
+      "Rabri Kheer  / Lab e sheeren": {"price": 1200, "factor": 8},
+      "Naan Taftan": {"price": 400, "factor": 8},
+      "Salad Raita": {"price": 300, "factor": 10},
+    },
+    {
+      "Chicken Tikka (Bihari/Malai/Balochi)": {"price": 1300, "factor": 4}, // change this to float 12.5
+      "Beef Biryani / Pulao": {"price": 2500, "factor": 12}, // change this to float 12.5
+      "Chicken Karahi / Qorma": {"price": 1400, "factor": 8},
+      "Gajar ka Halwa": {"price": 1500, "factor": 8},
+       "Wonton / ": {"price": 25, "factor": 1},              // cater float here
+      "Naan Taftan": {"price": 400, "factor": 8},
+      "Salad Raita": {"price": 300, "factor": 10},
+    },
+    {
+      "Ch Reshmi Kabab": {"price": 1400, "factor": 6}, 
+      "Ch Dynamite Fry": {"price": 1600, "factor": 7}, // change this to float 12.5
+      "Beef Yakhni Pulao/ Biryani": {"price": 2400, "factor": 12}, //// change this to float 12.5
+      "Ch Boneless Handi": {"price": 1600, "factor": 10},
+      "Rabri Kheer / ..": {"price": 1200, "factor": 10},              // cater float here
+      "Gulab Jamun": {"price": 400, "factor": 10},
+      "Salad Raita": {"price": 300, "factor": 15},
+    }
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Food Quantity Calculator'),
+        title: Text('Lavish Food Quantity Calculator'),
       ),
       bottomNavigationBar: BottomNavigationBar(
-
-        onTap: (index){
+        onTap: (index) {
           setState(() {
             myIndex = index;
           });
-
         },
         currentIndex: myIndex,
-
-        items: const[BottomNavigationBarItem(icon: Icon(Icons.food_bank_rounded), label: 'menu1'),
-        BottomNavigationBarItem(icon: Icon(Icons.food_bank), label: 'menu2'),
-        BottomNavigationBarItem(icon: Icon(Icons.food_bank_sharp), label: 'menu3',),],
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.food_bank_rounded), label: 'Menu 1'),
+          BottomNavigationBarItem(icon: Icon(Icons.food_bank), label: 'Menu 2'),
+          BottomNavigationBarItem(icon: Icon(Icons.food_bank_sharp), label: 'Menu 3'),
+          BottomNavigationBarItem(icon: Icon(Icons.food_bank_sharp), label: 'Menu 4'),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Input for total number of guests
+                // Background Image
+          // Positioned.fill(
+          //   child: Image.asset(
+          //     'background.jpg', // Path to your background image
+          //     fit: BoxFit.cover,
+          //   ),
+          // ),
+          // Foreground Content
+          // Input for total number of guests
             Row(
               children: [
                 Expanded(
@@ -90,11 +127,11 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
             // Food items list
             Expanded(
               child: ListView.builder(
-                itemCount: foodItems.length,
+                itemCount: menus[myIndex].length,
                 itemBuilder: (context, index) {
-                  String itemName = foodItems.keys.elementAt(index);
-                  int price = foodItems[itemName]?['price'];
-                  int factor = foodItems[itemName]?['factor'];
+                  String itemName = menus[myIndex].keys.elementAt(index);
+                  int price = menus[myIndex][itemName]?['price'];
+                  int factor = menus[myIndex][itemName]?['factor'];
 
                   int quantity = (totalNumberOfGuests / factor).ceil();
                   int total = quantity * price;
