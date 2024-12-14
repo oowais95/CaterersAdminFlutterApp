@@ -130,10 +130,10 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
                       child: Text('Item',
                           style: TextStyle(fontWeight: FontWeight.bold))),
                   Expanded(
-                      child: Text('Quantity',
+                      child: Text('Quantity (Kgs)',
                           style: TextStyle(fontWeight: FontWeight.bold))),
                   Expanded(
-                      child: Text('Price',
+                      child: Text('Price (Rs)',
                           style: TextStyle(fontWeight: FontWeight.bold))),
                   Expanded(
                       child: Text('Total',
@@ -153,14 +153,51 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
                     int quantity = (totalNumberOfGuests / factor).ceil();
                     int total = quantity * price;
 
-                    return Row(
-                      children: [
-                        Expanded(child: Text(itemName, style: TextStyle(fontWeight: FontWeight.bold),)),
-                        Expanded(child: Text(quantity.toString(), style: TextStyle(fontWeight: FontWeight.bold),)),
-                        Expanded(child: Text(price.toString(), style: TextStyle(fontWeight: FontWeight.bold),)),
-                        Expanded(child: Text(total.toString(), style: TextStyle(fontWeight: FontWeight.bold),)),
-                      ],
-                    );
+
+
+                    return Table(
+                          border: TableBorder.all(
+                            color: Colors.black, // Border color
+                            width: 1,           // Border width
+                          ),
+                          children: [
+                            TableRow(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    itemName,
+                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    quantity.toString(),
+                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    price.toString(),
+                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    total.toString(),
+                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        );
+
+
+
                   },
                 ),
               ),
