@@ -73,7 +73,7 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Lavish Food Quantity Calculator'),
-        backgroundColor: const Color.fromARGB(255, 104, 104, 104),
+        backgroundColor: const Color.fromARGB(255, 228, 189, 189),
       ),
       bottomNavigationBar: BottomNavigationBar(
         onTap: (index) {
@@ -155,10 +155,10 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
 
                     return Row(
                       children: [
-                        Expanded(child: Text(itemName)),
-                        Expanded(child: Text(quantity.toString())),
-                        Expanded(child: Text(price.toString())),
-                        Expanded(child: Text(total.toString())),
+                        Expanded(child: Text(itemName, style: TextStyle(fontWeight: FontWeight.bold),)),
+                        Expanded(child: Text(quantity.toString(), style: TextStyle(fontWeight: FontWeight.bold),)),
+                        Expanded(child: Text(price.toString(), style: TextStyle(fontWeight: FontWeight.bold),)),
+                        Expanded(child: Text(total.toString(), style: TextStyle(fontWeight: FontWeight.bold),)),
                       ],
                     );
                   },
