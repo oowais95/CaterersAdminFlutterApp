@@ -10,7 +10,14 @@ class FoodCalculatorApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Lavish Food Quantity Calculator',
-      theme: ThemeData(primarySwatch: Colors.blue),
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          backgroundColor: const Color.fromARGB(255, 216, 124, 124),
+          selectedItemColor: const Color.fromARGB(255, 252, 106, 106),
+          unselectedItemColor: const Color.fromARGB(255, 252, 144, 144),
+        ),
+      ),
       home: FoodCalculatorPage(),
     );
   }
@@ -33,7 +40,7 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
       "Naan Taftan": {"price": 400, "factor": 8},
       "Salad Raita": {"price": 300, "factor": 10},
     },
-    {
+     {
       "Chicken Tikka (Bihari/Malai/Balochi)": {"price": 1300, "factor": 4},
       "Beef Biryani / Pulao": {"price": 2500, "factor": 12},
       "Chicken Karahi / Qorma": {"price": 1400, "factor": 8},
@@ -66,10 +73,9 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Lavish Food Quantity Calculator'),
-        backgroundColor: const Color.fromARGB(255, 216, 166, 166),
+        backgroundColor: const Color.fromARGB(255, 104, 104, 104),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: const Color.fromARGB(255, 17, 17, 17),
         onTap: (index) {
           setState(() {
             myIndex = index;
@@ -104,7 +110,7 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
                     child: TextField(
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
-                        labelText: 'Total Number of Guests',
+                        labelText: 'Enter Total Number of Guests',
                         border: OutlineInputBorder(),
                       ),
                       onChanged: (value) {
