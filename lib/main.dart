@@ -27,36 +27,56 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
 
   final List<Map<String, Map<String, dynamic>>> menus = [
     {
-      "Beef Biryani / Pulao": {"price": 2500, "factor": 12}, // change this to float 12.5
+      "Beef Biryani / Pulao": {
+        "price": 2500,
+        "factor": 12.5
+      }, // change this to float 12.5
       "Chicken Karahi / Qorma": {"price": 1400, "factor": 8},
       "Rabri Kheer  / Lab e sheren": {"price": 1200, "factor": 8},
       "Naan Taftan": {"price": 400, "factor": 8},
-       "Salad Raita": {"price": 300, "factor": 10},
+      "Salad Raita": {"price": 300, "factor": 10},
     },
     {
-
-      "Chicken Tikka (Bihari/Malai/Balochi)": {"price": 1300, "factor": 4}, // change this to float 12.5
-      "Beef Biryani / Pulao": {"price": 2500, "factor": 12}, // change this to float 12.5
+      "Chicken Tikka (Bihari/Malai/Balochi)": {
+        "price": 1300,
+        "factor": 4
+      }, // change this to float 12.5
+      "Beef Biryani / Pulao": {
+        "price": 2500,
+        "factor": 12
+      }, // change this to float 12.5
       "Chicken Karahi / Qorma": {"price": 1400, "factor": 8},
       "Rabri Kheer  / Lab e sheeren": {"price": 1200, "factor": 8},
       "Naan Taftan": {"price": 400, "factor": 8},
       "Salad Raita": {"price": 300, "factor": 10},
     },
     {
-      "Chicken Tikka (Bihari/Malai/Balochi)": {"price": 1300, "factor": 4}, // change this to float 12.5
-      "Beef Biryani / Pulao": {"price": 2500, "factor": 12}, // change this to float 12.5
+      "Chicken Tikka (Bihari/Malai/Balochi)": {
+        "price": 1300,
+        "factor": 4
+      }, // change this to float 12.5
+      "Beef Biryani / Pulao": {
+        "price": 2500,
+        "factor": 12
+      }, // change this to float 12.5
       "Chicken Karahi / Qorma": {"price": 1400, "factor": 8},
       "Gajar ka Halwa": {"price": 1500, "factor": 8},
-       "Wonton / ": {"price": 25, "factor": 1},              // cater float here
+      "Wonton / ": {"price": 25, "factor": 1}, // cater float here
       "Naan Taftan": {"price": 400, "factor": 8},
       "Salad Raita": {"price": 300, "factor": 10},
     },
     {
-      "Ch Reshmi Kabab": {"price": 1400, "factor": 6}, 
-      "Ch Dynamite Fry": {"price": 1600, "factor": 7}, // change this to float 12.5
-      "Beef Yakhni Pulao/ Biryani": {"price": 2400, "factor": 12}, //// change this to float 12.5
+      "Ch Reshmi Kabab": {"price": 1400, "factor": 6},
+      "Ch Dynamite Fry": {
+        "price": 1600,
+        "factor": 7
+      }, // change this to float 12.5
+      "Beef Yakhni Pulao/ Biryani": {
+        "price": 2400,
+        "factor": 12
+      }, //// change this to float 12.5
       "Ch Boneless Handi": {"price": 1600, "factor": 10},
-      "Rabri Kheer / ..": {"price": 1200, "factor": 10},              // cater float here
+      "Rabri Kheer / ..": {"price": 1200, "factor": 10}, // cater float here
       "Gulab Jamun": {"price": 400, "factor": 10},
       "Salad Raita": {"price": 300, "factor": 15},
     }
@@ -67,6 +87,7 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Lavish Food Quantity Calculator'),
+        backgroundColor: Colors.redAccent,
       ),
       bottomNavigationBar: BottomNavigationBar(
         onTap: (index) {
@@ -76,25 +97,20 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
         },
         currentIndex: myIndex,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.food_bank_rounded), label: 'Menu 1'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.food_bank_rounded), label: 'Menu 1'),
           BottomNavigationBarItem(icon: Icon(Icons.food_bank), label: 'Menu 2'),
-          BottomNavigationBarItem(icon: Icon(Icons.food_bank_sharp), label: 'Menu 3'),
-          BottomNavigationBarItem(icon: Icon(Icons.food_bank_sharp), label: 'Menu 4'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.food_bank_sharp), label: 'Menu 3'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.food_bank_sharp), label: 'Menu 4'),
         ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-                // Background Image
-          // Positioned.fill(
-          //   child: Image.asset(
-          //     'background.jpg', // Path to your background image
-          //     fit: BoxFit.cover,
-          //   ),
-          // ),
-          // Foreground Content
-          // Input for total number of guests
+            // Input for total number of guests
             Row(
               children: [
                 Expanded(
@@ -117,10 +133,18 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
             // Table headers
             Row(
               children: [
-                Expanded(child: Text('Item', style: TextStyle(fontWeight: FontWeight.bold))),
-                Expanded(child: Text('Quantity', style: TextStyle(fontWeight: FontWeight.bold))),
-                Expanded(child: Text('Price', style: TextStyle(fontWeight: FontWeight.bold))),
-                Expanded(child: Text('Total', style: TextStyle(fontWeight: FontWeight.bold))),
+                Expanded(
+                    child: Text('Item',
+                        style: TextStyle(fontWeight: FontWeight.bold))),
+                Expanded(
+                    child: Text('Quantity',
+                        style: TextStyle(fontWeight: FontWeight.bold))),
+                Expanded(
+                    child: Text('Price',
+                        style: TextStyle(fontWeight: FontWeight.bold))),
+                Expanded(
+                    child: Text('Total',
+                        style: TextStyle(fontWeight: FontWeight.bold))),
               ],
             ),
             Divider(),
@@ -131,7 +155,7 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
                 itemBuilder: (context, index) {
                   String itemName = menus[myIndex].keys.elementAt(index);
                   int price = menus[myIndex][itemName]?['price'];
-                  int factor = menus[myIndex][itemName]?['factor'];
+                  double factor = menus[myIndex][itemName]?['factor'];
 
                   int quantity = (totalNumberOfGuests / factor).ceil();
                   int total = quantity * price;
