@@ -40,7 +40,7 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
       "Naan Taftan": {"price": 400, "factor": 8},
       "Salad Raita": {"price": 300, "factor": 10},
     },
-     {
+    {
       "Chicken Tikka (Bihari/Malai/Balochi)": {"price": 1300, "factor": 4},
       "Beef Biryani / Pulao": {"price": 2500, "factor": 12},
       "Chicken Karahi / Qorma": {"price": 1400, "factor": 8},
@@ -70,6 +70,8 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
 
   @override
   Widget build(BuildContext context) {
+    int totalSum = 0;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Lavish Food Quantity Calculator'),
@@ -124,20 +126,33 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
               ),
               SizedBox(height: 20),
               // Table headers
-              Row(
+              Table(
+                border: TableBorder.all(color: Colors.black),
                 children: [
-                  Expanded(
-                      child: Text('Item',
-                          style: TextStyle(fontWeight: FontWeight.bold))),
-                  Expanded(
-                      child: Text('Quantity (Kgs)',
-                          style: TextStyle(fontWeight: FontWeight.bold))),
-                  Expanded(
-                      child: Text('Price (Rs)',
-                          style: TextStyle(fontWeight: FontWeight.bold))),
-                  Expanded(
-                      child: Text('Total',
-                          style: TextStyle(fontWeight: FontWeight.bold))),
+                  TableRow(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text('Item',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text('Quantity (Kgs)',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text('Price (Rs)',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text('Total',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
                 ],
               ),
               Divider(),
@@ -153,53 +168,75 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
                     int quantity = (totalNumberOfGuests / factor).ceil();
                     int total = quantity * price;
 
-
+                    totalSum += total;
 
                     return Table(
-                          border: TableBorder.all(
-                            color: Colors.black, // Border color
-                            width: 1,           // Border width
-                          ),
+                      border: TableBorder.all(color: Colors.black,  width: 1,),
+                      children: [
+                        TableRow(
                           children: [
-                            TableRow(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(
-                                    itemName,
-                                    style: TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(
-                                    quantity.toString(),
-                                    style: TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(
-                                    price.toString(),
-                                    style: TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(
-                                    total.toString(),
-                                    style: TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                              ],
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(itemName,style: TextStyle(fontWeight: FontWeight.bold),),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(quantity.toString(),style: TextStyle(fontWeight: FontWeight.bold),),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(price.toString(),style: TextStyle(fontWeight: FontWeight.bold),),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(total.toString(),style: TextStyle(fontWeight: FontWeight.bold),),
                             ),
                           ],
-                        );
-
-
-
+                        ),
+                      ],
+                    );
                   },
                 ),
+              ),
+              Divider(),
+              // Total cost and per-head cost
+              Table(
+                border: TableBorder.all(color: Colors.black),
+                children: [
+                  TableRow(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text('Total Cost:',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(totalSum.toString(),
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
+                  TableRow(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text('Per Head Cost:',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          totalNumberOfGuests > 0
+                              ? (totalSum / totalNumberOfGuests)
+                                  .toStringAsFixed(2)
+                              : '0.00',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ],
           ),
