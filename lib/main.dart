@@ -70,7 +70,7 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
 
   @override
   Widget build(BuildContext context) {
-    int totalSum = 0;
+    int grandTotal = 0;
 
     return Scaffold(
       appBar: AppBar(
@@ -168,7 +168,7 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
                     int quantity = (totalNumberOfGuests / factor).ceil();
                     int total = quantity * price;
 
-                    totalSum += total;
+                    grandTotal += total;
 
                     return Table(
                       border: TableBorder.all(color: Colors.black,  width: 1,),
@@ -207,12 +207,12 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text('Total Cost:',
+                        child: Text('Grand Total:',
                             style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text(totalSum.toString(),
+                        child: Text(grandTotal.toString(),
                             style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
                     ],
@@ -228,7 +228,7 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
                         padding: const EdgeInsets.all(8.0),
                         child: Text(
                           totalNumberOfGuests > 0
-                              ? (totalSum / totalNumberOfGuests)
+                              ? (grandTotal / totalNumberOfGuests)
                                   .toStringAsFixed(2)
                               : '0.00',
                           style: TextStyle(fontWeight: FontWeight.bold),
