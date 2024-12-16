@@ -33,6 +33,8 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
   int grandTotal = 0;
   double perHeadCost = 0.0;
   int myIndex = 0;
+  int selectedPage = 1; // Track the selected page for the side nav
+
 
   final List<Map<String, Map<String, dynamic>>> menus = [
     {
@@ -42,7 +44,7 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
       "Naan Taftan": {"price": 400, "factor": 8},
       "Salad Raita": {"price": 300, "factor": 10},
     },
-     {
+    {
       "Chicken Tikka (Bihari/Malai/Balochi)": {"price": 1300, "factor": 4},
       "Beef Biryani / Pulao": {"price": 2500, "factor": 12},
       "Chicken Karahi / Qorma": {"price": 1400, "factor": 8},
@@ -59,7 +61,7 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
       "Naan Taftan": {"price": 400, "factor": 8},
       "Salad Raita": {"price": 300, "factor": 10},
     },
-    {
+     {
       "Ch Reshmi Kabab": {"price": 1400, "factor": 6},
       "Ch Dynamite Fry": {"price": 1600, "factor": 7.5},
       "Beef Yakhni Pulao/ Biryani": {"price": 2400, "factor": 12},
@@ -67,8 +69,8 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
       "Rabri Kheer / ..": {"price": 1200, "factor": 10},
       "Gulab Jamun": {"price": 400, "factor": 10},
       "Salad Raita": {"price": 300, "factor": 15},
-    }// Other menus omitted for brevity
-  ];
+    } 
+   ];
 
   void calculateTotals() {
     int tempGrandTotal = 0;
@@ -95,6 +97,46 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
         title: Text('Lavish Food Quantity Calculator'),
         backgroundColor: const Color.fromARGB(255, 228, 189, 189),
       ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
+              child: Text('Navigation', style: TextStyle(color: Colors.white)),
+            ),
+            ListTile(
+              title: Text('1'),
+              onTap: () {
+                setState(() {
+                  selectedPage = 1;
+                  Navigator.pop(context);
+                });
+              },
+            ),
+            ListTile(
+              title: Text('2'),
+              onTap: () {
+                setState(() {
+                  selectedPage = 2;
+                  Navigator.pop(context);
+                });
+              },
+            ),
+            ListTile(
+              title: Text('3'),
+              onTap: () {
+                setState(() {
+                  selectedPage = 3;
+                  Navigator.pop(context);
+                });
+              },
+            ),
+          ],
+        ),
+      ),
       bottomNavigationBar: BottomNavigationBar(
         onTap: (index) {
           setState(() {
@@ -110,8 +152,7 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
           BottomNavigationBarItem(
               icon: Icon(Icons.food_bank_sharp), label: 'Menu 3'),
           BottomNavigationBarItem(
-              icon: Icon(Icons.food_bank_sharp), label: 'Menu 4'),
-        ],
+              icon: Icon(Icons.food_bank_sharp), label: 'Menu 4'),        ],
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -124,7 +165,11 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              Row(
+              Text('Current Page: $selectedPage',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              SizedBox(height: 20),
+              // The rest of your UI remains the same
+               Row(
                 children: [
                   Expanded(
                     child: TextField(
@@ -253,6 +298,25 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
           ),
         ),
       ),
+    
     );
+  }
+
+  
+  Widget _getPageContent() {
+    switch (selectedPage) {
+      case 1:
+        return Text('Page 1 Content',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold));
+      case 2:
+        return Text('Page 2 Content',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold));
+      case 3:
+        return Text('Page 3 Content',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold));
+      default:
+        return Text('Unknown Page',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold));
+    }
   }
 }
