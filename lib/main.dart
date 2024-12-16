@@ -30,6 +30,8 @@ class FoodCalculatorPage extends StatefulWidget {
 
 class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
   int totalNumberOfGuests = 0;
+  int grandTotal = 0;
+  double perHeadCost = 0.0;
   int myIndex = 0;
 
   final List<Map<String, Map<String, dynamic>>> menus = [
@@ -40,7 +42,7 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
       "Naan Taftan": {"price": 400, "factor": 8},
       "Salad Raita": {"price": 300, "factor": 10},
     },
-    {
+     {
       "Chicken Tikka (Bihari/Malai/Balochi)": {"price": 1300, "factor": 4},
       "Beef Biryani / Pulao": {"price": 2500, "factor": 12},
       "Chicken Karahi / Qorma": {"price": 1400, "factor": 8},
@@ -59,19 +61,35 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
     },
     {
       "Ch Reshmi Kabab": {"price": 1400, "factor": 6},
-      "Ch Dynamite Fry": {"price": 1600, "factor": 7},
+      "Ch Dynamite Fry": {"price": 1600, "factor": 7.5},
       "Beef Yakhni Pulao/ Biryani": {"price": 2400, "factor": 12},
       "Ch Boneless Handi": {"price": 1600, "factor": 10},
       "Rabri Kheer / ..": {"price": 1200, "factor": 10},
       "Gulab Jamun": {"price": 400, "factor": 10},
       "Salad Raita": {"price": 300, "factor": 15},
-    }
+    }// Other menus omitted for brevity
   ];
+
+  void calculateTotals() {
+    int tempGrandTotal = 0;
+
+    menus[myIndex].forEach((itemName, details) {
+      int price = details['price'];
+      double factor = details['factor'];
+      int quantity = (totalNumberOfGuests / factor).ceil();
+      tempGrandTotal += quantity * price;
+    });
+
+    setState(() {
+      grandTotal = tempGrandTotal;
+      perHeadCost = totalNumberOfGuests > 0
+          ? grandTotal / totalNumberOfGuests
+          : 0.0;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    int grandTotal = 0;
-
     return Scaffold(
       appBar: AppBar(
         title: Text('Lavish Food Quantity Calculator'),
@@ -81,6 +99,7 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
         onTap: (index) {
           setState(() {
             myIndex = index;
+            calculateTotals(); // Recalculate totals when the menu changes
           });
         },
         currentIndex: myIndex,
@@ -105,7 +124,6 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              // Input for total number of guests
               Row(
                 children: [
                   Expanded(
@@ -118,6 +136,7 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
                       onChanged: (value) {
                         setState(() {
                           totalNumberOfGuests = int.tryParse(value) ?? 0;
+                          calculateTotals(); // Recalculate totals on input
                         });
                       },
                     ),
@@ -125,7 +144,6 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
                 ],
               ),
               SizedBox(height: 20),
-              // Table headers
               Table(
                 border: TableBorder.all(color: Colors.black),
                 children: [
@@ -148,7 +166,7 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text('Total',
+                        child: Text('Total (Rs)',
                             style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
                     ],
@@ -156,7 +174,6 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
                 ],
               ),
               Divider(),
-              // Food items list
               Expanded(
                 child: ListView.builder(
                   itemCount: menus[myIndex].length,
@@ -168,28 +185,26 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
                     int quantity = (totalNumberOfGuests / factor).ceil();
                     int total = quantity * price;
 
-                    grandTotal += total;
-
                     return Table(
-                      border: TableBorder.all(color: Colors.black,  width: 1,),
+                      border: TableBorder.all(color: Colors.black),
                       children: [
                         TableRow(
                           children: [
                             Padding(
                               padding: const EdgeInsets.all(8.0),
-                              child: Text(itemName,style: TextStyle(fontWeight: FontWeight.bold),),
+                              child: Text(itemName),
                             ),
                             Padding(
                               padding: const EdgeInsets.all(8.0),
-                              child: Text(quantity.toString(),style: TextStyle(fontWeight: FontWeight.bold),),
+                              child: Text(quantity.toString()),
                             ),
                             Padding(
                               padding: const EdgeInsets.all(8.0),
-                              child: Text(price.toString(),style: TextStyle(fontWeight: FontWeight.bold),),
+                              child: Text(price.toString()),
                             ),
                             Padding(
                               padding: const EdgeInsets.all(8.0),
-                              child: Text(total.toString(),style: TextStyle(fontWeight: FontWeight.bold),),
+                              child: Text(total.toString()),
                             ),
                           ],
                         ),
@@ -199,7 +214,6 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
                 ),
               ),
               Divider(),
-              // Total cost and per-head cost
               Table(
                 border: TableBorder.all(color: Colors.black),
                 children: [
@@ -227,10 +241,7 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text(
-                          totalNumberOfGuests > 0
-                              ? (grandTotal / totalNumberOfGuests)
-                                  .toStringAsFixed(2)
-                              : '0.00',
+                          perHeadCost.toStringAsFixed(2),
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
