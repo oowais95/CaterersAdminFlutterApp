@@ -168,6 +168,13 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
               Text('Current Page: $selectedPage',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               SizedBox(height: 20),
+              
+              Expanded(
+                child: Center(
+                  child: _getPageContent(), // Display dynamic content
+                ),
+              ),
+                SizedBox(height: 20),
               // The rest of your UI remains the same
                Row(
                 children: [
