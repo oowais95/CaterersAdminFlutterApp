@@ -35,10 +35,9 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
   int myIndex = 0;
   int selectedPage = 1; // Track the selected page for the side nav
 
-
   final List<Map<String, Map<String, dynamic>>> menus = [
     {
-      "Beef Biryani / Pulao": {"price": 2500, "factor": 12.5},
+      "Beef Biryani / Pulao": {"price": 2500, "factor": 13},
       "Chicken Karahi / Qorma": {"price": 1400, "factor": 8},
       "Rabri Kheer  / Lab e sheren": {"price": 1200, "factor": 8},
       "Naan Taftan": {"price": 400, "factor": 8},
@@ -61,42 +60,44 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
       "Naan Taftan": {"price": 400, "factor": 8},
       "Salad Raita": {"price": 300, "factor": 10},
     },
-     {
+    {
       "Ch Reshmi Kabab": {"price": 1400, "factor": 6},
-      "Ch Dynamite Fry": {"price": 1600, "factor": 7.5},
+      "Ch Dynamite Fry": {"price": 1600, "factor": 8},
       "Beef Yakhni Pulao/ Biryani": {"price": 2400, "factor": 12},
       "Ch Boneless Handi": {"price": 1600, "factor": 10},
       "Rabri Kheer / ..": {"price": 1200, "factor": 10},
       "Gulab Jamun": {"price": 400, "factor": 10},
       "Salad Raita": {"price": 300, "factor": 15},
-    } 
-   ];
+    }
+  ];
 
   void calculateTotals() {
     int tempGrandTotal = 0;
 
     menus[myIndex].forEach((itemName, details) {
       int price = details['price'];
-      double factor = details['factor'];
+      int factor = details['factor'];
       int quantity = (totalNumberOfGuests / factor).ceil();
       tempGrandTotal += quantity * price;
     });
 
     setState(() {
       grandTotal = tempGrandTotal;
-      perHeadCost = totalNumberOfGuests > 0
-          ? grandTotal / totalNumberOfGuests
-          : 0.0;
+      perHeadCost =
+          totalNumberOfGuests > 0 ? grandTotal / totalNumberOfGuests : 0.0;
     });
   }
 
+//======================================BUILD =======================================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Lavish Food Quantity Calculator'),
+        title: Text('Lavish Cateres'),
         backgroundColor: const Color.fromARGB(255, 228, 189, 189),
       ),
+
+
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
@@ -137,6 +138,9 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
           ],
         ),
       ),
+
+
+
       bottomNavigationBar: BottomNavigationBar(
         onTap: (index) {
           setState(() {
@@ -152,15 +156,19 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
           BottomNavigationBarItem(
               icon: Icon(Icons.food_bank_sharp), label: 'Menu 3'),
           BottomNavigationBarItem(
-              icon: Icon(Icons.food_bank_sharp), label: 'Menu 4'),        ],
+              icon: Icon(Icons.food_bank_sharp), label: 'Menu 4'),
+        ],
       ),
+
+
+      
       body: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('lavishAppbg.jpg'),
-            fit: BoxFit.cover,
-          ),
-        ),
+        // decoration: BoxDecoration(
+        //   image: DecorationImage(
+        //     image: AssetImage('lavishAppbg.jpg'),
+        //     fit: BoxFit.cover,
+        //   ),
+        // ),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -168,15 +176,15 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
               Text('Current Page: $selectedPage',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               SizedBox(height: 20),
-              
+
               Expanded(
                 child: Center(
                   child: _getPageContent(), // Display dynamic content
                 ),
               ),
-                SizedBox(height: 20),
+              SizedBox(height: 20),
               // The rest of your UI remains the same
-               Row(
+              Row(
                 children: [
                   Expanded(
                     child: TextField(
@@ -232,7 +240,7 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
                   itemBuilder: (context, index) {
                     String itemName = menus[myIndex].keys.elementAt(index);
                     int price = menus[myIndex][itemName]?['price'];
-                    double factor = menus[myIndex][itemName]?['factor'];
+                    int factor = menus[myIndex][itemName]?['factor'];
 
                     int quantity = (totalNumberOfGuests / factor).ceil();
                     int total = quantity * price;
@@ -305,11 +313,11 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
           ),
         ),
       ),
-    
     );
   }
 
-  
+// ===================================== SCAFFOLOD END ===========================================
+
   Widget _getPageContent() {
     switch (selectedPage) {
       case 1:
@@ -319,11 +327,58 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
         return Text('Page 2 Content',
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold));
       case 3:
-        return Text('Page 3 Content',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold));
+        return _buildHardcodedPackagesPage(); // New method for case 3
       default:
         return Text('Unknown Page',
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold));
     }
+  }
+
+// New method to show hardcoded package options
+  Widget _buildHardcodedPackagesPage() {
+    // Hardcoded options grouped by per-head cost
+    final Map<int, List<List<String>>> packageOptions = {
+      1000: [
+        ['Beef Biryani', 'Chicken Karahi', 'Naan', 'Raita'],
+        ['Chicken Pulao', 'Gajar Ka Halwa', 'Taftan', 'Salad'],
+      ],
+      1200: [
+        ['Chicken Biryani', 'Chicken Tikka', 'Rabri Kheer', 'Naan'],
+        ['Beef Pulao', 'Chicken Handi', 'Gulab Jamun', 'Taftan'],
+        ['Chicken Qorma', 'Mutton Karahi', 'Fruit Trifle', 'Raita'],
+      ],
+      1500: [
+        ['Mutton Biryani', 'Mutton Karahi', 'Shahi Tukda', 'Naan'],
+        [
+          'Chicken Dynamite Fry',
+          'Beef Yakhni Pulao',
+          'Gajar Ka Halwa',
+          'Salad'
+        ],
+      ],
+    };
+
+    return ListView(
+      padding: EdgeInsets.all(16.0),
+      children: packageOptions.entries.map((entry) {
+        return Card(
+          margin: EdgeInsets.only(bottom: 16.0),
+          child: ExpansionTile(
+            title: Text(
+              'Per Head: Rs ${entry.key}',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            children: entry.value.map((package) {
+              return ListTile(
+                title: Text(
+                  package.join(', '), // Join the food items in the package
+                  style: TextStyle(fontSize: 16),
+                ),
+              );
+            }).toList(),
+          ),
+        );
+      }).toList(),
+    );
   }
 }
