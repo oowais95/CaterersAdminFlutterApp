@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'pages/invoicing_page.dart';
 
 void main() {
   runApp(FoodCalculatorApp());
@@ -124,6 +125,17 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
                 });
               },
             ),
+            ListTile(
+              leading: Icon(Icons.receipt_long),
+              title: Text('Invoicing'),
+              selected: selectedPage == 3,
+              onTap: () {
+                setState(() {
+                  selectedPage = 3;
+                  Navigator.pop(context);
+                });
+              },
+            ),
           ],
         ),
       ),
@@ -149,7 +161,11 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
               ],
             )
           : null,
-      body: selectedPage == 1 ? _buildDefaultBody() : _buildHardcodedPackagesPage(),
+      body: selectedPage == 1
+          ? _buildDefaultBody()
+          : selectedPage == 2
+              ? _buildHardcodedPackagesPage()
+              : const InvoicingPage(),
     );
   }
 
