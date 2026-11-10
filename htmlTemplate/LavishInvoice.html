@@ -326,18 +326,19 @@
       </div>
       <div class="invoice-heading">
         <h1>INVOICE</h1>
-        <p><strong>Date:</strong> <span data-field="invoice-date">09 November 2026</span></p>
+        <p><strong>Date:</strong> <span data-field="invoice-date">{{invoice-date}}</span></p>
       </div>
     </header>
 
     <section class="customer-block" aria-label="Customer details">
       <div>
         <span class="eyebrow">Billed to</span>
-        <p class="customer-name" data-field="customer-name">Mr. Ahmed Khan</p>
+        <p class="customer-name" data-field="customer-name">{{customer-name}}</p>
+        <p style="margin:5px 0 0;font-size:13px;color:#666" data-field="customer-contact">{{customer-contact}}</p>
       </div>
       <div style="text-align:right">
-        <span class="eyebrow">Order reference</span>
-        <p style="margin:0;font-size:13px;color:#666" data-field="order-reference">LC-2026-001</p>
+        <span class="eyebrow">Invoice number</span>
+        <p style="margin:0;font-size:13px;color:#666" data-field="invoice-number">{{invoice-number}}</p>
       </div>
     </section>
 
@@ -352,26 +353,7 @@
             <th>Total Amount</th>
           </tr>
         </thead>
-        <tbody data-field="order-items">
-          <tr data-unit-price="1000" data-quantity="250">
-            <td>Wedding Dinner Catering</td>
-            <td class="unit-price">Rs. 1,000</td>
-            <td>250 Guests</td>
-            <td class="line-total">Rs. 250,000</td>
-          </tr>
-          <tr data-unit-price="150" data-quantity="250">
-            <td>Welcome Refreshments</td>
-            <td class="unit-price">Rs. 150</td>
-            <td>250 Guests</td>
-            <td class="line-total">Rs. 37,500</td>
-          </tr>
-          <tr data-unit-price="15000" data-quantity="1">
-            <td>Additional Dessert Counter</td>
-            <td class="unit-price">Rs. 15,000</td>
-            <td>1</td>
-            <td class="line-total">Rs. 15,000</td>
-          </tr>
-        </tbody>
+        <tbody data-field="order-items">{{order-items}}</tbody>
       </table>
     </section>
 
@@ -379,15 +361,15 @@
       <div class="summary">
         <div class="summary-row grand">
           <span>Grand Total</span>
-          <strong data-field="grand-total">Rs. 302,500</strong>
+          <strong data-field="grand-total">{{grand-total}}</strong>
         </div>
         <div class="summary-row">
           <span>Paid Amount</span>
-          <strong data-field="paid-amount">Rs. 200,000</strong>
+          <strong data-field="paid-amount">{{paid-amount}}</strong>
         </div>
         <div class="summary-row balance">
           <span>Balance Due</span>
-          <strong data-field="balance-amount">Rs. 102,500</strong>
+          <strong data-field="balance-amount">{{balance-amount}}</strong>
         </div>
       </div>
     </section>
@@ -448,5 +430,5 @@
       }
     });
   </script>
-\n</body>
+</body>
 </html>

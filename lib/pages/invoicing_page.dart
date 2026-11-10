@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../services/invoice_pdf_service.dart';
+
 class InvoicingPage extends StatefulWidget {
-  const InvoicingPage({super.key});
+  const InvoicingPage({
+    super.key,
+    this.invoicePdfService = const InvoicePdfService(),
+  });
+
+  final InvoicePdfService invoicePdfService;
 
   @override
   State<InvoicingPage> createState() => _InvoicingPageState();
@@ -14,7 +21,10 @@ class _InvoicingPageState extends State<InvoicingPage> {
       TextEditingController();
   final TextEditingController _paidAmountController = TextEditingController();
   final List<_InvoiceItem> _items = [_InvoiceItem()];
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   DateTime _invoiceDate = DateTime.now();
+  String? _invoiceNumber;
+  bool _isSharing = false;
 
   double get _grandTotal => _items.fold(0, (total, item) => total + item.total);
 
@@ -58,6 +68,57 @@ class _InvoicingPageState extends State<InvoicingPage> {
 
   void _refreshTotals() => setState(() {});
 
+  Future<void> _shareInvoice() async {
+    if (_isSharing || !(_formKey.currentState?.validate() ?? false)) return;
+
+    final invoiceNumber = _invoiceNumber ?? _createInvoiceNumber();
+    _invoiceNumber = invoiceNumber;
+    final invoice = InvoiceData(
+      invoiceNumber: invoiceNumber,
+      invoiceDate: _invoiceDate,
+      customerName: _customerNameController.text,
+      customerContact: _customerContactController.text,
+      items: _items
+          .map(
+            (item) => InvoiceLineItem(
+              description: item.descriptionController.text,
+              unitPrice:
+                  double.tryParse(item.unitPriceController.text.trim()) ?? 0,
+              quantity:
+                  double.tryParse(item.quantityController.text.trim()) ?? 0,
+            ),
+          )
+          .toList(),
+      paidAmount: _paidAmount,
+    );
+
+    setState(() => _isSharing = true);
+    try {
+      await widget.invoicePdfService.generateAndShare(invoice);
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(content: Text('Could not share invoice: $error')),
+        );
+    } finally {
+      if (mounted) setState(() => _isSharing = false);
+    }
+  }
+
+  String _createInvoiceNumber() {
+    final now = DateTime.now();
+    final date = '${now.year}'
+        '${now.month.toString().padLeft(2, '0')}'
+        '${now.day.toString().padLeft(2, '0')}';
+    final time = '${now.hour.toString().padLeft(2, '0')}'
+        '${now.minute.toString().padLeft(2, '0')}'
+        '${now.second.toString().padLeft(2, '0')}'
+        '${now.microsecond.toString().padLeft(6, '0')}';
+    return 'LC-$date-$time';
+  }
+
   String? _validateAmount(String? value) {
     if (value == null || value.trim().isEmpty) return null;
     final amount = double.tryParse(value);
@@ -75,6 +136,7 @@ class _InvoicingPageState extends State<InvoicingPage> {
     return Container(
       color: const Color(0xFFFAF8F7),
       child: Form(
+        key: _formKey,
         autovalidateMode: AutovalidateMode.onUserInteraction,
         child: ListView(
           padding: const EdgeInsets.all(16),
@@ -167,6 +229,31 @@ class _InvoicingPageState extends State<InvoicingPage> {
                 ),
                 const SizedBox(height: 12),
                 _totalRow('Balance Amount', _balanceAmount),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    key: const ValueKey('share-invoice'),
+                    onPressed: _isSharing ? null : _shareInvoice,
+                    icon: _isSharing
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.share),
+                    label: Text(
+                      _isSharing
+                          ? 'Preparing invoice...'
+                          : 'Share via WhatsApp',
+                    ),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: const Color(0xFF8F1719),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 16),
