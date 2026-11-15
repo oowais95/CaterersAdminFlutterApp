@@ -1,9 +1,11 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_html_to_pdf/flutter_native_html_to_pdf.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 
 class InvoiceData {
@@ -13,8 +15,9 @@ class InvoiceData {
     required this.customerName,
     required this.customerContact,
     required List<InvoiceLineItem> items,
-    required this.paidAmount,
-  }) : items = List.unmodifiable(items);
+    required double paidAmount,
+  })  : items = List.unmodifiable(items),
+        paidAmount = _roundToCents(paidAmount);
 
   final String invoiceNumber;
   final DateTime invoiceDate;
@@ -23,9 +26,10 @@ class InvoiceData {
   final List<InvoiceLineItem> items;
   final double paidAmount;
 
-  double get grandTotal => items.fold(0, (total, item) => total + item.total);
+  double get grandTotal =>
+      _roundToCents(items.fold(0, (total, item) => total + item.total));
 
-  double get balanceAmount => grandTotal - paidAmount;
+  double get balanceAmount => _roundToCents(grandTotal - paidAmount);
 }
 
 class InvoiceLineItem {
@@ -39,8 +43,10 @@ class InvoiceLineItem {
   final double unitPrice;
   final double quantity;
 
-  double get total => unitPrice * quantity;
+  double get total => _roundToCents(unitPrice * quantity);
 }
+
+double _roundToCents(double amount) => (amount * 100).round() / 100;
 
 class InvoiceHtmlTemplate {
   static const assetPath = 'htmlTemplate/LavishInvoice.html';
@@ -143,11 +149,7 @@ class InvoicePdfService {
   const InvoicePdfService();
 
   Future<void> generateAndShare(InvoiceData invoice) async {
-    if (kIsWeb || (!Platform.isAndroid && !Platform.isIOS)) {
-      throw UnsupportedError(
-        'PDF sharing is currently supported on Android and iOS.',
-      );
-    }
+    _ensureSupportedPlatform();
 
     final template = await rootBundle.loadString(InvoiceHtmlTemplate.assetPath);
     final html = InvoiceHtmlTemplate.render(
@@ -172,6 +174,295 @@ class InvoicePdfService {
       [XFile(pdfFile.path, mimeType: 'application/pdf')],
       subject: 'Invoice ${invoice.invoiceNumber}',
       text: 'Please find attached invoice ${invoice.invoiceNumber}.',
+    );
+  }
+
+  Future<void> generateAndSharePng(InvoiceData invoice) async {
+    _ensureSupportedPlatform();
+    final pngBytes = await createPng(invoice);
+    final directory = await getTemporaryDirectory();
+    final safeInvoiceNumber =
+        invoice.invoiceNumber.replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '_');
+    final pngFile = File(
+      '${directory.path}${Platform.pathSeparator}invoice_$safeInvoiceNumber.png',
+    );
+    await pngFile.writeAsBytes(pngBytes, flush: true);
+
+    if (!await pngFile.exists() || await pngFile.length() == 0) {
+      throw FileSystemException('Invoice PNG was not created.', pngFile.path);
+    }
+
+    await Share.shareXFiles(
+      [XFile(pngFile.path, mimeType: 'image/png')],
+      subject: 'Invoice ${invoice.invoiceNumber}',
+      text: 'Please find attached invoice ${invoice.invoiceNumber}.',
+    );
+  }
+
+  Future<Uint8List> createPng(InvoiceData invoice) {
+    return ScreenshotController().captureFromLongWidget(
+      _InvoicePngDocument(invoice: invoice),
+      pixelRatio: 2,
+      constraints: const BoxConstraints(maxWidth: 820),
+    );
+  }
+
+  void _ensureSupportedPlatform() {
+    if (kIsWeb || (!Platform.isAndroid && !Platform.isIOS)) {
+      throw UnsupportedError(
+        'Invoice sharing is currently supported on Android and iOS.',
+      );
+    }
+  }
+}
+
+class _InvoicePngDocument extends StatelessWidget {
+  const _InvoicePngDocument({required this.invoice});
+
+  final InvoiceData invoice;
+
+  static const _brand = Color(0xFFA91618);
+  static const _ink = Color(0xFF292929);
+  static const _muted = Color(0xFF707070);
+  static const _line = Color(0xFFE9E3E1);
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTextStyle(
+      style: const TextStyle(
+        color: _ink,
+        fontFamily: 'Arial',
+        fontSize: 14,
+      ),
+      child: Container(
+        width: 820,
+        padding: const EdgeInsets.all(40),
+        color: Colors.white,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'LAVISH CATERERS',
+                      style: TextStyle(
+                        color: _brand,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Catering services for every occasion',
+                      style: TextStyle(color: _muted, fontSize: 13),
+                    ),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    const Text(
+                      'INVOICE',
+                      style: TextStyle(
+                        color: _brand,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text('No. ${invoice.invoiceNumber}'),
+                    const SizedBox(height: 4),
+                    Text(InvoiceHtmlTemplate._formatDate(invoice.invoiceDate)),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 28),
+            const Divider(color: _brand, thickness: 2, height: 2),
+            const SizedBox(height: 24),
+            const Text(
+              'BILL TO',
+              style: TextStyle(
+                color: _muted,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              invoice.customerName.trim().isEmpty
+                  ? '—'
+                  : invoice.customerName.trim(),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+            ),
+            if (invoice.customerContact.trim().isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                invoice.customerContact.trim(),
+                style: const TextStyle(color: _muted),
+              ),
+            ],
+            const SizedBox(height: 24),
+            Container(
+              color: const Color(0xFFFBF7F6),
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+              child: const Row(
+                children: [
+                  Expanded(
+                    flex: 5,
+                    child: Text(
+                      'ITEM DESCRIPTION',
+                      style: TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      'UNIT PRICE',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      'QTY',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      'TOTAL',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (invoice.items.isEmpty)
+              _itemRow('No order items', '', '', '')
+            else
+              ...invoice.items.map(
+                (item) => _itemRow(
+                  item.description.trim().isEmpty ? '—' : item.description,
+                  InvoiceHtmlTemplate._formatCurrency(item.unitPrice),
+                  InvoiceHtmlTemplate._formatNumber(item.quantity),
+                  InvoiceHtmlTemplate._formatCurrency(item.total),
+                ),
+              ),
+            const SizedBox(height: 20),
+            const Divider(color: _line),
+            _amountRow('Total Amount', invoice.grandTotal),
+            const SizedBox(height: 10),
+            _amountRow('Paid Amount', invoice.paidAmount),
+            const SizedBox(height: 10),
+            _amountRow(
+              'Balance Amount',
+              invoice.balanceAmount,
+              emphasize: true,
+            ),
+            const SizedBox(height: 28),
+            const Divider(color: _line),
+            const SizedBox(height: 12),
+            const Center(
+              child: Text(
+                'Thank you for choosing Lavish Caterers',
+                style: TextStyle(color: _muted, fontSize: 13),
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Center(
+              child: Text(
+                '0300-8929033  |  0315-2497674',
+                style: TextStyle(color: _muted, fontSize: 12),
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Center(
+              child: Text(
+                'Federal B Area, Block 16, Shop No. LS36, Karachi',
+                style: TextStyle(color: _muted, fontSize: 12),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Center(
+              child: Text(
+                'lavishcaterers.com.pk  |  Instagram: lavishcateringservices',
+                style: TextStyle(color: _muted, fontSize: 12),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Center(
+              child: Text(
+                'Proudly serving since 1995',
+                style: TextStyle(color: _muted, fontSize: 12),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _itemRow(
+      String description, String price, String quantity, String total) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: _line)),
+      ),
+      child: Row(
+        children: [
+          Expanded(flex: 5, child: Text(description)),
+          Expanded(flex: 2, child: Text(price, textAlign: TextAlign.right)),
+          Expanded(child: Text(quantity, textAlign: TextAlign.right)),
+          Expanded(flex: 2, child: Text(total, textAlign: TextAlign.right)),
+        ],
+      ),
+    );
+  }
+
+  Widget _amountRow(String label, double amount, {bool emphasize = false}) {
+    final color = emphasize ? _brand : _ink;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        SizedBox(
+          width: 180,
+          child: Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: emphasize ? 17 : 14,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+        SizedBox(
+          width: 150,
+          child: Text(
+            InvoiceHtmlTemplate._formatCurrency(amount),
+            textAlign: TextAlign.right,
+            style: TextStyle(
+              color: color,
+              fontSize: emphasize ? 17 : 14,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

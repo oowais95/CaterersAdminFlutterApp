@@ -26,12 +26,13 @@ class _InvoicingPageState extends State<InvoicingPage> {
   String? _invoiceNumber;
   bool _isSharing = false;
 
-  double get _grandTotal => _items.fold(0, (total, item) => total + item.total);
+  double get _grandTotal =>
+      _roundToCents(_items.fold(0, (total, item) => total + item.total));
 
   double get _paidAmount =>
-      double.tryParse(_paidAmountController.text.trim()) ?? 0;
+      _roundToCents(double.tryParse(_paidAmountController.text.trim()) ?? 0);
 
-  double get _balanceAmount => _grandTotal - _paidAmount;
+  double get _balanceAmount => _roundToCents(_grandTotal - _paidAmount);
 
   @override
   void dispose() {
@@ -71,6 +72,37 @@ class _InvoicingPageState extends State<InvoicingPage> {
   Future<void> _shareInvoice() async {
     if (_isSharing || !(_formKey.currentState?.validate() ?? false)) return;
 
+    final format = await showModalBottomSheet<_InvoiceShareFormat>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 20, 16, 8),
+              child: Text(
+                'Choose invoice format',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+              ),
+            ),
+            ListTile(
+              key: const ValueKey('share-invoice-pdf'),
+              leading: const Icon(Icons.picture_as_pdf_outlined),
+              title: const Text('Share as PDF'),
+              onTap: () => Navigator.pop(context, _InvoiceShareFormat.pdf),
+            ),
+            ListTile(
+              key: const ValueKey('share-invoice-png'),
+              leading: const Icon(Icons.image_outlined),
+              title: const Text('Share as PNG'),
+              onTap: () => Navigator.pop(context, _InvoiceShareFormat.png),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (format == null || !mounted) return;
+
     final invoiceNumber = _invoiceNumber ?? _createInvoiceNumber();
     _invoiceNumber = invoiceNumber;
     final invoice = InvoiceData(
@@ -94,7 +126,11 @@ class _InvoicingPageState extends State<InvoicingPage> {
 
     setState(() => _isSharing = true);
     try {
-      await widget.invoicePdfService.generateAndShare(invoice);
+      if (format == _InvoiceShareFormat.pdf) {
+        await widget.invoicePdfService.generateAndShare(invoice);
+      } else {
+        await widget.invoicePdfService.generateAndSharePng(invoice);
+      }
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
@@ -191,8 +227,21 @@ class _InvoicingPageState extends State<InvoicingPage> {
               title: 'Order Items',
               icon: Icons.restaurant_menu,
               children: [
-                for (var index = 0; index < _items.length; index++)
-                  _buildItemCard(index, _items[index]),
+                ReorderableListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  buildDefaultDragHandles: false,
+                  itemCount: _items.length,
+                  onReorder: (oldIndex, newIndex) {
+                    setState(() {
+                      if (newIndex > oldIndex) newIndex -= 1;
+                      final item = _items.removeAt(oldIndex);
+                      _items.insert(newIndex, item);
+                    });
+                  },
+                  itemBuilder: (context, index) =>
+                      _buildItemCard(index, _items[index]),
+                ),
                 Align(
                   alignment: Alignment.centerLeft,
                   child: OutlinedButton.icon(
@@ -284,6 +333,14 @@ class _InvoicingPageState extends State<InvoicingPage> {
                   child: Text(
                     'Item ${index + 1}',
                     style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+                ReorderableDragStartListener(
+                  key: ValueKey('reorder-item-$index'),
+                  index: index,
+                  child: const Padding(
+                    padding: EdgeInsets.all(12),
+                    child: Icon(Icons.drag_handle),
                   ),
                 ),
                 IconButton(
@@ -438,7 +495,7 @@ class _InvoiceItem {
   double get total {
     final unitPrice = double.tryParse(unitPriceController.text.trim()) ?? 0;
     final quantity = double.tryParse(quantityController.text.trim()) ?? 0;
-    return unitPrice * quantity;
+    return _roundToCents(unitPrice * quantity);
   }
 
   void dispose() {
@@ -447,6 +504,10 @@ class _InvoiceItem {
     quantityController.dispose();
   }
 }
+
+enum _InvoiceShareFormat { pdf, png }
+
+double _roundToCents(double amount) => (amount * 100).round() / 100;
 
 class _NonNegativeDecimalFormatter extends TextInputFormatter {
   static final _validDecimal = RegExp(r'^\d*\.?\d*$');

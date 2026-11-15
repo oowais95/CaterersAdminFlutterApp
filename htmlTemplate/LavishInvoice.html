@@ -388,47 +388,5 @@
     </footer>
   </main>
 
-  <script>
-    // Each item row uses data-unit-price and data-quantity as its source values.
-    // The displayed line total is always Unit Price multiplied by Quantity.
-    document.addEventListener("DOMContentLoaded", function () {
-      const money = value =>
-        "Rs. " + Number(value).toLocaleString("en-PK", {
-          maximumFractionDigits: 2
-        });
-
-      const rows = document.querySelectorAll(
-        '[data-field="order-items"] tr[data-unit-price][data-quantity]'
-      );
-
-      let grandTotal = 0;
-
-      rows.forEach(row => {
-        const unitPrice = Number(row.dataset.unitPrice);
-        const quantity = Number(row.dataset.quantity);
-        const lineTotal = unitPrice * quantity;
-
-        const unitPriceCell = row.querySelector(".unit-price");
-        const totalCell = row.querySelector(".line-total");
-
-        if (unitPriceCell) unitPriceCell.textContent = money(unitPrice);
-        if (totalCell) totalCell.textContent = money(lineTotal);
-
-        grandTotal += lineTotal;
-      });
-
-      const grandTotalElement = document.querySelector('[data-field="grand-total"]');
-      const paidElement = document.querySelector('[data-field="paid-amount"]');
-      const balanceElement = document.querySelector('[data-field="balance-amount"]');
-
-      const paidText = paidElement ? paidElement.textContent : "0";
-      const paidAmount = Number(paidText.replace(/[^0-9.]/g, "")) || 0;
-
-      if (grandTotalElement) grandTotalElement.textContent = money(grandTotal);
-      if (balanceElement) {
-        balanceElement.textContent = money(grandTotal - paidAmount);
-      }
-    });
-  </script>
 </body>
 </html>

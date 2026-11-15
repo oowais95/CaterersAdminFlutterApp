@@ -34,7 +34,7 @@ class _FoodCalculatorPageState extends State<FoodCalculatorPage> {
   int grandTotal = 0;
   double perHeadCost = 0.0;
   int myIndex = 0;
-  int selectedPage = 1;
+  int selectedPage = 3;
 
   final List<Map<String, Map<String, dynamic>>> menus = [
     {

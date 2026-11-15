@@ -32,6 +32,7 @@ void main() {
     expect(html, contains('data-field="paid-amount">Rs. 50'));
     expect(html, contains('data-field="balance-amount">Rs. 150'));
     expect(html, isNot(contains('{{')));
+    expect(html, isNot(contains('document.addEventListener')));
   });
 
   test('invoice template renders escaped customer data and every item', () {
@@ -98,6 +99,57 @@ void main() {
     expect(html, contains('Rs. 0|Rs. 0|Rs. 0'));
   });
 
+  test('invoice balance is total amount minus paid amount', () {
+    final invoice = InvoiceData(
+      invoiceNumber: 'LC-1',
+      invoiceDate: DateTime(2026, 1, 2),
+      customerName: 'Customer',
+      customerContact: '',
+      items: const [
+        InvoiceLineItem(description: 'Catering', unitPrice: 80000, quantity: 1),
+      ],
+      paidAmount: 2000,
+    );
+
+    expect(invoice.balanceAmount, 78000);
+    expect(
+      InvoiceHtmlTemplate.render(
+        template: '{{invoice-number}}|{{invoice-date}}|{{customer-name}}|'
+            '{{customer-contact}}|{{order-items}}|{{grand-total}}|'
+            '{{paid-amount}}|{{balance-amount}}',
+        invoice: invoice,
+      ),
+      endsWith('Rs. 80,000|Rs. 2,000|Rs. 78,000'),
+    );
+  });
+
+  testWidgets('invoice PNG renderer creates a PNG image', (tester) async {
+    final pngBytes = await tester.runAsync(
+      () => const InvoicePdfService().createPng(
+        InvoiceData(
+          invoiceNumber: 'LC-1',
+          invoiceDate: DateTime(2026, 1, 2),
+          customerName: 'Customer',
+          customerContact: '0300-1234567',
+          items: const [
+            InvoiceLineItem(
+              description: 'Catering',
+              unitPrice: 80000,
+              quantity: 1,
+            ),
+          ],
+          paidAmount: 2000,
+        ),
+      ),
+    );
+    expect(pngBytes, isNotNull);
+
+    expect(
+      pngBytes!.take(8).toList(),
+      [137, 80, 78, 71, 13, 10, 26, 10],
+    );
+  });
+
   testWidgets('invoice totals update from decimal item and payment values',
       (tester) async {
     await tester.pumpWidget(
@@ -152,9 +204,51 @@ void main() {
     expect(find.text('Item 2'), findsNothing);
   });
 
+  testWidgets('invoice items can be reordered', (tester) async {
+    tester.view.physicalSize = const Size(800, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      const MaterialApp(home: InvoicingPage()),
+    );
+
+    await tester.enterText(
+      find.byKey(const ValueKey('item-description-0')),
+      'First item',
+    );
+    await tester.tap(find.text('Add Item'));
+    await tester.pump();
+    await tester.enterText(
+      find.byKey(const ValueKey('item-description-1')),
+      'Second item',
+    );
+
+    await tester.drag(
+      find.byKey(const ValueKey('reorder-item-0')),
+      const Offset(0, 220),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.widget<TextFormField>(
+        find.byKey(const ValueKey('item-description-0')),
+      ).controller!.text,
+      'Second item',
+    );
+    expect(
+      tester.widget<TextFormField>(
+        find.byKey(const ValueKey('item-description-1')),
+      ).controller!.text,
+      'First item',
+    );
+  });
+
   testWidgets('Invoicing is available from the navigation drawer',
       (tester) async {
     await tester.pumpWidget(FoodCalculatorApp());
+    expect(find.text('Create Invoice'), findsOneWidget);
     await tester.tap(find.byTooltip('Open navigation menu'));
     await tester.pumpAndSettle();
 
@@ -193,21 +287,56 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('share-invoice')));
     await tester.pumpAndSettle();
+    expect(find.text('Share as PDF'), findsOneWidget);
+    expect(find.text('Share as PNG'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('share-invoice-pdf')));
+    await tester.pumpAndSettle();
 
     expect(service.sharedInvoice, isNotNull);
+    expect(service.sharedFormat, 'pdf');
     expect(service.sharedInvoice!.customerName, '');
     expect(service.sharedInvoice!.items.single.description, 'Wedding dinner');
     expect(service.sharedInvoice!.items.single.total, 301);
     expect(service.sharedInvoice!.grandTotal, 301);
     expect(service.sharedInvoice!.paidAmount, 0);
   });
+
+  testWidgets('invoice can be shared as PNG', (tester) async {
+    final service = _FakeInvoicePdfService();
+    await tester.pumpWidget(
+      MaterialApp(home: InvoicingPage(invoicePdfService: service)),
+    );
+
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('share-invoice')),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.ensureVisible(find.byKey(const ValueKey('share-invoice')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('share-invoice')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('share-invoice-png')));
+    await tester.pumpAndSettle();
+
+    expect(service.sharedFormat, 'png');
+    expect(service.sharedInvoice, isNotNull);
+  });
 }
 
 class _FakeInvoicePdfService extends InvoicePdfService {
   InvoiceData? sharedInvoice;
+  String? sharedFormat;
 
   @override
   Future<void> generateAndShare(InvoiceData invoice) async {
     sharedInvoice = invoice;
+    sharedFormat = 'pdf';
+  }
+
+  @override
+  Future<void> generateAndSharePng(InvoiceData invoice) async {
+    sharedInvoice = invoice;
+    sharedFormat = 'png';
   }
 }
